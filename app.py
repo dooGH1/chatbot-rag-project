@@ -71,7 +71,7 @@ with st.sidebar:
     st.markdown("### ℹ️ Thông tin hệ thống")
     st.markdown("- **Mô hình LLM:** Gemini")
     st.markdown("- **Vector Database:** FAISS")
-    st.markdown("- **Nhóm thực hiện:** Nhóm 2 PTIT")
+    st.markdown("- **Nhóm thực hiện:** Duy-Ánh-Đức PTIT")
 
 # --- MAIN CHAT INTERFACE ---
 # Khởi tạo lịch sử chat nếu chưa có
