@@ -1,8 +1,11 @@
 streamlit
+protobuf>=5.27.0
 langchain==0.1.16
 langchain-google-genai
+langchain-community
 faiss-cpu
 pypdf
 python-docx
 python-dotenv
 sentence-transformers
+torchvision
