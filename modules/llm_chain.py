@@ -2,13 +2,17 @@ import os
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains.retrieval import create_retrieval_chain
+from langchain_core.output_parsers import StrOutputParser
+from operator import itemgetter
 
 load_dotenv()
 
+def format_docs(docs):
+    """Hàm định dạng văn bản từ danh sách Document được truy xuất"""
+    return "\n\n".join(doc.page_content for doc in docs)
+
 def get_rag_chain(vector_db):
-    """Khởi tạo LLM và chuỗi truy xuất RAG tương thích với các phiên bản langchain mới"""
+    """Khởi tạo LLM và chuỗi RAG bằng LCEL tương thích 100% với langchain_core"""
     api_key = os.getenv("GOOGLE_API_KEY")
     
     if not api_key:
@@ -21,7 +25,7 @@ def get_rag_chain(vector_db):
         google_api_key=api_key
     )
     
-    # Định nghĩa Prompt Template chuẩn
+    # Định nghĩa Prompt Template
     template = """
     Bạn là trợ lý AI trả lời câu hỏi dựa trên tài liệu được cung cấp.
     Dưới đây là các đoạn thông tin được trích xuất từ tài liệu (Ngữ cảnh):
@@ -41,8 +45,16 @@ def get_rag_chain(vector_db):
     # Thiết lập retriever lấy top 3 đoạn liên quan nhất
     retriever = vector_db.as_retriever(search_kwargs={"k": 3})
     
-    # Tạo chuỗi xử lý tài liệu và chuỗi retrieval chuẩn theo version mới
-    combine_docs_chain = create_stuff_documents_chain(llm, prompt)
-    retrieval_chain = create_retrieval_chain(retriever, combine_docs_chain)
+    # Xây dựng chuỗi RAG chuẩn LCEL thay thế cho create_retrieval_chain cũ
+    rag_chain = (
+        {
+            "context": itemgetter("input") | retriever | format_docs, 
+            "input": itemgetter("input")
+        }
+        | prompt
+        | llm
+        | StrOutputParser()
+        | (lambda x: {"answer": x}) # Giả lập format output của chain cũ để tương thích với app.py
+    )
     
-    return retrieval_chain
+    return rag_chain
