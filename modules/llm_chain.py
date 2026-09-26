@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains import create_retrieval_chain
+from langchain.chains.retrieval import create_retrieval_chain
 
 load_dotenv()
 
@@ -41,7 +41,7 @@ def get_rag_chain(vector_db):
     # Thiết lập retriever lấy top 3 đoạn liên quan nhất
     retriever = vector_db.as_retriever(search_kwargs={"k": 3})
     
-    # Tạo chuỗi xử lý tài liệu và chuỗi retrieval
+    # Tạo chuỗi xử lý tài liệu và chuỗi retrieval chuẩn theo version mới
     combine_docs_chain = create_stuff_documents_chain(llm, prompt)
     retrieval_chain = create_retrieval_chain(retriever, combine_docs_chain)
     
